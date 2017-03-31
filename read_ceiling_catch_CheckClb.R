@@ -7,47 +7,44 @@
 
 # ----------------------------------------------------------------------------------------
 
-## Specify working directory
+readCatchCCO <- function(directory, file) { 
 
-  wd <- "C:\\Users\\gart\\Desktop\\zzz\\ctc\\annual run old base\\2017\\evaluate cei fit"
-  setwd(wd)
+  lines <- readLines(paste0(directory, "\\", file))
+  endLine <- grep("TERMINAL RUN COMPARISONS", lines) - 3
 
-## Specify Name of Check Clb Out file
+  lines <- lines[1:endLine]
 
-  file <- "1701BCheckClb.out"
+  fisheryLines <- grep("CEILINGS SPECIFIED FOR", lines)
+  startLines <- fisheryLines + 6
+  endLines <- startLines + 37
 
-# --------------------------------------------------------------------------------------------------------
+  x <- NULL
+  for(i in 1:length(startLines)) { 
 
-lines <- readLines(file)
-endLine <- grep("TERMINAL RUN COMPARISONS", lines) - 3
+    fishery <- lines[fisheryLines[i]]
+    fishery <- substr(fishery, 24, nchar(fishery))
 
-lines <- lines[1:endLine]
+    catches <- lines[startLines[i]:endLines[i]]
+    catches <- substr(catches, 1, 20)
 
-fisheryLines <- grep("CEILINGS SPECIFIED FOR", lines)
-startLines <- fisheryLines + 6
-endLines <- startLines + 37
+    year <- as.numeric(substr(catches, 1,4))
 
-x <- NULL
-for(i in 1:length(startLines)) { 
+    obs <- as.numeric(substr(catches, 7,12))
 
-  fishery <- lines[fisheryLines[i]]
-  fishery <- substr(fishery, 24, nchar(fishery))
+    est <- as.numeric(substr(catches, 15,20))
 
-  catches <- lines[startLines[i]:endLines[i]]
-  catches <- substr(catches, 1, 20)
+    temp <- data.frame(year, fishery, obs, est)
 
-  year <- as.numeric(substr(catches, 1,4))
+    x <- rbind(res, temp)
 
-  obs <- as.numeric(substr(catches, 7,12))
-
-  est <- as.numeric(substr(catches, 15,20))
-
-  temp <- data.frame(year, fishery, obs, est)
-
-  x <- rbind(res, temp)
-
+  }
+ return(x)
 }
 
 # --------------------------------------------------------------------------------------------------------
 
-head(x,50)
+# Test 
+  # wd <- "C:\\Users\\gart\\Desktop\\zzz\\ctc\\annual run old base\\2017\\evaluate cei fit"
+  # readCatchCCO(wd, "1701BCheckClb.out")
+
+# -----------------------------------------------------------------------------------------
